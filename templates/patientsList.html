@@ -3,9 +3,22 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+            <form actrion="#" method="post">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" placeholder="Nazwisko" name="surname">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2" value="Szukaj">Szukaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
             <ul class="list-group">
                 {% for pt in patients %}
-                <li class="list-group-item">{{pt.name + " " + pt.surname + " " + pt.id}}</li>
+                <a href="patient/{{pt.id}}" class="text-decoration-none"><li class="list-group-item mb-1">{{pt.name + " " + pt.surname + " ID pacjenta: " + pt.id}}</li></a>
                 {% endfor %}
             </ul>
         </div>
