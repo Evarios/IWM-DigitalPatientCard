@@ -1,6 +1,31 @@
 {% extends "base.html" %}
 {% block content %}
-<p>{{patient.name}}</p>
-<p>{{patient.surname}}</p>
-<p>{{patient.id}}</p>
+<p>{{patient_data.name}}</p>
+<p>{{patient_data.surname}}</p>
+<p>{{patient_data.id}}</p>
+<p>{{patient_data.gender}}</p>
+<p>{{patient_data.birthDate}}</p>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="accordion" id="medicalData">
+                {% for record in medical_data %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#record{{ loop.index }}">
+                            {{record['date']}}
+                        </button>
+                    </h2>
+                    <div id="record{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#medicalData">
+                        <div class="accordion-body">
+                            <strong>{{record['name']}}</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
