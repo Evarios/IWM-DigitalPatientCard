@@ -1,10 +1,92 @@
 {% extends "base.html" %}
 {% block content %}
-<p>{{patient_data.name}}</p>
-<p>{{patient_data.surname}}</p>
-<p>{{patient_data.id}}</p>
-<p>{{patient_data.gender}}</p>
-<p>{{patient_data.birthDate}}</p>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div>
+                <table class="table table-striped border table-borderless">
+                    <thead>
+                        <tr>
+                            <th class="text-center" colspan="4">
+                                <h2>Dane pacjenta</h2>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>
+                                    Imię:
+                                </strong>
+                            </td>
+                            <td class="col-10">
+                                {{patient_data['name']}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>
+                                    Nazwisko:
+                                </strong>
+                            </td>
+                            <td class="col-10"> 
+                                {{patient_data['surname']}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>
+                                    Data urodzenia:
+                                </strong>
+                            </td>
+                            <td class="col-10">
+                                {{patient_data['birthDate']}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>
+                                    Płeć:
+                                </strong>
+                            </td>
+                            <td class="col-10">
+                                {{patient_data['gender']}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>
+                                    ID pacjenta:
+                                </strong>
+                            </td>
+                            <td class="col-10">
+                                {{patient_data['id']}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form actrion="#" method="post">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Od</span>
+                    <input type="text" class="form-control" name="dateFrom" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" placeholder="YYYY-MM-DD" title="Wprowadź poprawną datę w formacie YYYY-MM-DD">
+                    <span class="input-group-text">Do</span>
+                    <input type="text" class="form-control" name="dateTo" pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])" placeholder="YYYY-MM-DD" title="Wprowadź poprawną datę w formacie YYYY-MM-DD">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2" value="Filtruj">Filtruj</button>
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2" formmethod="get">Resetuj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -19,7 +101,9 @@
                     </h2>
                     <div id="record{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#medicalData">
                         <div class="accordion-body">
-                            <strong>{{record['name']}}</strong>
+                            <p><strong>Osberwacja: {{record['name']}}</strong></p>
+                            <p>Wartość: {{record['value']}} {{record['unit']}}</p>
+
                         </div>
                     </div>
                 </div>
