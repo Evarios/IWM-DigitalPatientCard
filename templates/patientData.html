@@ -96,14 +96,17 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#record{{ loop.index }}">
-                            {{record['date']}}
+                            {{record['typeString'] }} {{record['date']}}
                         </button>
                     </h2>
                     <div id="record{{loop.index}}" class="accordion-collapse collapse" data-bs-parent="#medicalData">
                         <div class="accordion-body">
-                            <p><strong>Osberwacja: {{record['name']}}</strong></p>
-                            <p>Wartość: {{record['value']}} {{record['unit']}}</p>
-
+                            {% if record['typeString'] == "Obserwacja" %}
+                                <p><strong>Osberwacja: {{record['name']}}</strong></p>
+                                <p>Wartość: {{record['value']}} {{record['unit']}}</p>
+                            {% else %}
+                                <p><strong>Lekarstwo: {{record['value']}}</strong></p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 from fhirpy import SyncFHIRClient
 from dateutil import parser
+from datetime import datetime
 import pytz
 
 # setup
@@ -53,7 +54,7 @@ def patient_page(id):
             'surname': patient_resource['name'][0].family,
             'id': patient_resource['id'],
             'gender': patient_resource['gender'],
-            'birthDate': parser.parse(patient_birthdate_string).strftime("%m/%d/%Y")
+            'birthDate': parser.parse(patient_birthdate_string).strftime("%d/%m/%Y")
         }
         
         #Get observations
@@ -62,29 +63,46 @@ def patient_page(id):
         observation_list = []
         for o in observations:
             observation = {}
+            observation['typeString'] = "Obserwacja"
             observation['name'] = o.to_resource(
             )['code']['coding'][0]['display']
             observation_date_string = o.to_resource()['issued']
             observation['date'] = parser.parse(
-                observation_date_string).strftime("%m/%d/%Y, %H:%M:%S")
+                observation_date_string).strftime("%d/%m/%Y, %H:%M:%S")
             observation['dateSort'] = parser.parse(observation_date_string)
             if 'valueQuantity' in o:
                 observation['value'] = round(o['valueQuantity']['value'], 2)
                 observation['unit'] = o['valueQuantity']['unit']
             observation_list.append(observation)
 
-        observation_list = sorted(
-            observation_list, key=lambda d: d['dateSort'], reverse=True)
-        
-        #TODO get and display medications
+        statements = client.resources(
+            'MedicationRequest').search(subject=patient_reference)
+        statements_list = []
+        for s in statements:
+            statement = {}
+            statement['typeString'] = "Lekarstwo"
+            statement['value'] = s['medicationCodeableConcept']['coding'][0]['display']
+            statement_date_string = s['authoredOn']
+            statement['date'] = parser.parse(statement_date_string).strftime("%d/%m/%Y, %H:%M:%S")
+            statement['dateSort'] = parser.parse(statement_date_string)
+            statements_list.append(statement)
 
-        return render_template("patientData.html", patient_data=patient, medical_data=observation_list)
+        medical_data_list = observation_list + statements_list
+        medical_data_list = sorted(medical_data_list, key=lambda d: d['dateSort'], reverse=True)
+
+        return render_template("patientData.html", patient_data=patient, medical_data=medical_data_list)
     else:
 
         date_from = request.form['dateFrom']
         date_to = request.form['dateTo']
+
+        datetime_from = datetime(1000, 1, 1)
+        datetime_from.replace(tzinfo=pytz.utc)
         if date_from != "":
             datetime_from = parser.parse(date_from).replace(tzinfo=pytz.utc)
+
+        datetime_to = datetime.now()
+        datetime_to =  datetime_to.replace(tzinfo=pytz.utc)
         if date_to != "":
             datetime_to = parser.parse(date_to).replace(tzinfo=pytz.utc)
 
@@ -96,7 +114,7 @@ def patient_page(id):
             'surname': patient_resource['name'][0].family,
             'id': patient_resource['id'],
             'gender': patient_resource['gender'],
-            'birthDate': parser.parse(patient_birthdate_string).strftime("%m/%d/%Y")
+            'birthDate': parser.parse(patient_birthdate_string).strftime("%d/%m/%Y")
         }
         
         #get observations
@@ -105,11 +123,12 @@ def patient_page(id):
         observation_list = []
         for o in observations:
             observation = {}
+            observation['typeString'] = "Obserwacja"
             observation['name'] = o.to_resource(
             )['code']['coding'][0]['display']
             observation_date_string = o.to_resource()['issued']
             observation['date'] = parser.parse(
-                observation_date_string).strftime("%m/%d/%Y, %H:%M:%S")
+                observation_date_string).strftime("%d/%m/%Y, %H:%M:%S")
             observation['dateSort'] = parser.parse(observation_date_string).replace(tzinfo=pytz.utc)
             if 'valueQuantity' in o:
                 observation['value'] = round(o['valueQuantity']['value'], 2)
@@ -123,19 +142,37 @@ def patient_page(id):
             else:
                 continue
 
-        observation_list = sorted(
-            observation_list, key=lambda d: d['dateSort'], reverse=True)
+        statements = client.resources(
+            'MedicationRequest').search(subject=patient_reference)
+        statements_list = []
+        for s in statements:
+            statement = {}
+            statement['typeString'] = "Lekarstwo"
+            statement['value'] = s['medicationCodeableConcept']['coding'][0]['display']
+            statement_date_string = s['authoredOn']
+            statement['date'] = parser.parse(
+                statement_date_string).strftime("%d/%m/%Y, %H:%M:%S")
+            statement['dateSort'] = parser.parse(statement_date_string)
+            if statement['dateSort'] <= datetime_to and date_from == "":
+                statements_list.append(statement)
+            elif statement['dateSort'] >= datetime_from and date_to == "":
+                statements_list.append(statement)
+            elif statement['dateSort'] >= datetime_from and statement['dateSort'] <= datetime_to:
+                statements_list.append(statement)
+            else:
+                continue
+            print("test" + statement['dateSort'].strftime("%d/%m/%Y, %H:%M:%S"))
+        medical_data_list = observation_list + statements_list
+        medical_data_list = sorted(medical_data_list, key=lambda d: d['dateSort'], reverse=True)
 
-        #TODO get and display medications
-
-        return render_template("patientData.html", patient_data=patient, medical_data=observation_list)
+        return render_template("patientData.html", patient_data=patient, medical_data=medical_data_list)
 
 
 if __name__ == "__main__":
-    patient = client.reference(
-        'Patient', '31191928-6acb-4d73-931c-e601cc3a13fa')
-    statements = client.resources('MedicationRequest').search(subject=patient)
-    for s in statements:
-        print(s['medicationCodeableConcept'])
+    # patient = client.reference(
+    #     'Patient', '31191928-6acb-4d73-931c-e601cc3a13fa')
+    # statements = client.resources('Observation').search(subject=patient)
+    # for s in statements:
+    #     print(s.to_resource()['issued'])
     
-    #app.run(debug=True)
+    app.run(debug=True)
